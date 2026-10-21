@@ -25,9 +25,11 @@ import {
 } from "lucide-react";
 import "./styles.css";
 
+
 const API = (
-  import.meta.env.VITE_API_URL || "http://localhost:8000"
+  import.meta.env.VITE_API_URL || "https://billproof-starter.onrender.com"
 ).replace(/\/$/, "");
+
 
 const FILTERS = [
   "All Documents",
