@@ -1210,3 +1210,32 @@ def delete_bill(
 
     return {"deleted": True}
 
+# --------------------------------------------------
+# GOOGLE PUB/SUB GMAIL NOTIFICATION ENDPOINT
+# --------------------------------------------------
+
+from fastapi import Request, HTTPException
+
+
+@app.post("/api/gmail/notifications")
+async def gmail_notifications(request: Request):
+    try:
+        payload = await request.json()
+    except Exception:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid JSON payload.",
+        )
+
+    message = payload.get("message")
+
+    if not message:
+        raise HTTPException(
+            status_code=400,
+            detail="Missing Pub/Sub message.",
+        )
+
+    # Acknowledge the notification.
+    # Gmail history must be processed separately.
+    return {"received": True}
+
