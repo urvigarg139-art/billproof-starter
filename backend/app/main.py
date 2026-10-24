@@ -1,5 +1,6 @@
+from google.auth.transport.requests import Request as GoogleAuthRequest
+from google.oauth2 import id_token
 import json
-import hmac
 from types import SimpleNamespace
 import os
 import re
@@ -228,8 +229,7 @@ def parse_fields(text: str, filename: str):
         )
     amount = None
     matches = re.findall(
-        r"(?:₹|INR|R&#x73;**\.**?)\s*([0-9,]+(?:**\.**[0-9]{1,2})?)",
-        r"(?:₹|INR|R&#x73;**\.**?)\s*([0-9,]+(?:**\.**[0-9]{1,2})?)",
+        r"(?:₹|INR|Rs\.?)\s*([0-9,]+(?:\.[0-9]{1,2})?)",
         text,
         re.IGNORECASE,
     )
@@ -1055,18 +1055,43 @@ async def gmail_push(request: Request):
     Receive a Google Pub/Sub push notification and start
     processing recent purchase-related email attachments.
     Configure the Pub/Sub push endpoint as:
-    https://YOUR_PUBLIC_HOST/api/gmail/push?token=YOUR_SECRET
+    https://YOUR_PUBLIC_HOST/api/gmail/push
     """
-    expected_token = os.getenv("PUBSUB_PUSH_TOKEN", "")
-    supplied_token = request.query_params.get("token", "")
+    authorization = request.headers.get("authorization", "")
+    expected_audience = os.getenv(
+        "PUBSUB_PUSH_AUDIENCE",
+        "https://billproof-starter.onrender.com",
+    ).strip()
+    expected_service_account = os.getenv(
+        "PUBSUB_PUSH_SERVICE_ACCOUNT_EMAIL", ""
+    ).strip().lower()
+
+    if not authorization.startswith("Bearer ") or not expected_service_account:
+        raise HTTPException(
+            status_code=401,
+            detail="Missing or invalid push authentication.",
+        )
+
+    google_token = authorization.split(" ", 1)[1].strip()
+    try:
+        claims = id_token.verify_oauth2_token(
+            google_token,
+            GoogleAuthRequest(),
+            audience=expected_audience,
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=401,
+            detail="Google push token verification failed.",
+        ) from exc
+
     if (
-        not expected_token
-        or not supplied_token
-        or not hmac.compare_digest(expected_token, supplied_token)
+        claims.get("email", "").lower() != expected_service_account
+        or claims.get("email_verified") is not True
     ):
         raise HTTPException(
             status_code=401,
-            detail="Invalid push authentication.",
+            detail="Unexpected push service account.",
         )
     try:
         body = await request.json()
