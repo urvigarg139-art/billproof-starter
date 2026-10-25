@@ -48,7 +48,7 @@ from googleapiclient.errors import HttpError
 
 from pydantic import BaseModel
 
-from PIL import Image
+from PIL import Image, ImageOps, ImageEnhance, ImageFilter
 
 try:
 
@@ -355,42 +355,111 @@ def get_gmail_credentials(email: str):
 
 
 def extract_text(path: str, content_type: str) -> str:
-    """Extract selectable PDF text first, then OCR scanned PDFs/images."""
-    is_pdf = content_type == "application/pdf" or path.lower().endswith(".pdf")
+    """Extract selectable PDF text or OCR text from scanned PDFs and images."""
+    if not pytesseract:
+        print("OCR ERROR: pytesseract Python package is not installed.")
+        return ""
+
+    try:
+        pytesseract.get_tesseract_version()
+    except Exception as exc:
+        print(f"OCR ENGINE ERROR: Tesseract is unavailable: {exc}")
+        return ""
+
+    def run_ocr(source_image):
+        image = ImageOps.exif_transpose(source_image).convert("RGB")
+
+        # Upscale small receipts and improve contrast before OCR.
+        if image.width < 1600:
+            scale = 1600 / image.width
+            image = image.resize(
+                (1600, max(1, int(image.height * scale))),
+                Image.Resampling.LANCZOS,
+            )
+
+        image = ImageOps.grayscale(image)
+        image = ImageOps.autocontrast(image)
+        image = ImageEnhance.Contrast(image).enhance(1.5)
+        image = image.filter(ImageFilter.SHARPEN)
+
+        text = pytesseract.image_to_string(
+            image,
+            config="--oem 3 --psm 6",
+            timeout=30,
+        )
+        if len(text.strip()) < 20:
+            alternate = pytesseract.image_to_string(
+                image,
+                config="--oem 3 --psm 11",
+                timeout=30,
+            )
+            if len(alternate.strip()) > len(text.strip()):
+                text = alternate
+        return text.strip()
+
+    is_pdf = (
+        content_type == "application/pdf"
+        or path.lower().endswith(".pdf")
+    )
 
     if is_pdf:
-        text = ""
         if PdfReader:
             try:
                 reader = PdfReader(path)
-                text = "\n".join(page.extract_text() or "" for page in reader.pages).strip()
+                selectable_text = "\n".join(
+                    page.extract_text() or ""
+                    for page in reader.pages[:5]
+                ).strip()
+                if len(selectable_text) >= 20:
+                    print(
+                        "PDF TEXT EXTRACTION:",
+                        len(selectable_text),
+                        "characters",
+                    )
+                    return selectable_text[:20000]
             except Exception as exc:
-                print(f"PDF text extraction failed: {exc}")
+                print(f"PDF TEXT EXTRACTION ERROR: {exc}")
 
-        if text:
-            return text[:20000]
+        if not fitz:
+            print("PDF OCR ERROR: PyMuPDF (fitz) is not installed.")
+            return ""
 
-        # A scanned PDF has no selectable text; OCR up to five pages.
-        if pytesseract and fitz:
-            try:
-                extracted_pages = []
-                with fitz.open(path) as document:
-                    for page in list(document)[:5]:
-                        pix = page.get_pixmap(dpi=220, alpha=False)
-                        image = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
-                        extracted_pages.append(pytesseract.image_to_string(image))
-                return "\n".join(extracted_pages).strip()[:20000]
-            except Exception as exc:
-                print(f"Scanned PDF OCR failed: {exc}")
+        try:
+            pages = []
+            with fitz.open(path) as document:
+                for page in list(document)[:5]:
+                    pix = page.get_pixmap(
+                        dpi=250,
+                        colorspace=fitz.csRGB,
+                        alpha=False,
+                    )
+                    page_image = Image.frombytes(
+                        "RGB",
+                        (pix.width, pix.height),
+                        pix.samples,
+                    )
+                    pages.append(run_ocr(page_image))
+
+            result = "\n".join(pages).strip()[:20000]
+            print("SCANNED PDF OCR:", len(result), "characters")
+            if not result:
+                print("SCANNED PDF OCR WARNING: no text recognized.")
+            return result
+        except Exception as exc:
+            print(f"SCANNED PDF OCR ERROR: {type(exc).__name__}: {exc}")
+            return ""
+
+    try:
+        with Image.open(path) as source_image:
+            result = run_ocr(source_image)[:20000]
+        print("IMAGE OCR:", len(result), "characters")
+        if not result:
+            print("IMAGE OCR WARNING: no text recognized.")
+        return result
+    except Exception as exc:
+        print(f"IMAGE OCR ERROR: {type(exc).__name__}: {exc}")
         return ""
 
-    if pytesseract:
-        try:
-            with Image.open(path) as image:
-                return pytesseract.image_to_string(image.convert("RGB"))[:20000]
-        except Exception as exc:
-            print(f"Image OCR failed: {exc}")
-    return ""
 def parse_invoice_date(value: str) -> str:
     """Parse common invoice date formats into YYYY-MM-DD."""
     value = re.sub(r"\s+", " ", value.strip()).replace(",", "")
@@ -1638,6 +1707,19 @@ async def upload_bill(
         text = extract_text(temp_path, file.content_type or "")
 
         fields = parse_fields(text, filename)
+
+        print(
+            "BILL EXTRACTION DEBUG:",
+            {
+                "file": filename,
+                "text_characters": len(text),
+                "product_found": bool(fields.get("product")),
+                "seller_found": bool(fields.get("seller")),
+                "purchase_date_found": bool(fields.get("purchase_date")),
+                "amount_found": fields.get("amount") is not None,
+                "warranty_months": fields.get("warranty_months", 0),
+            },
+        )
 
         # Use an explicitly supplied warranty duration; otherwise use OCR.
         if warranty_months <= 0:
