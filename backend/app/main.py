@@ -363,7 +363,7 @@ def extract_text(path: str, content_type: str) -> str:
         if PdfReader:
             try:
                 reader = PdfReader(path)
-                text = "\\n".join(page.extract_text() or "" for page in reader.pages).strip()
+                text = "\n".join(page.extract_text() or "" for page in reader.pages).strip()
             except Exception as exc:
                 print(f"PDF text extraction failed: {exc}")
 
@@ -379,7 +379,7 @@ def extract_text(path: str, content_type: str) -> str:
                         pix = page.get_pixmap(dpi=220, alpha=False)
                         image = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
                         extracted_pages.append(pytesseract.image_to_string(image))
-                return "\\n".join(extracted_pages).strip()[:20000]
+                return "\n".join(extracted_pages).strip()[:20000]
             except Exception as exc:
                 print(f"Scanned PDF OCR failed: {exc}")
         return ""
@@ -393,7 +393,7 @@ def extract_text(path: str, content_type: str) -> str:
     return ""
 def parse_invoice_date(value: str) -> str:
     """Parse common invoice date formats into YYYY-MM-DD."""
-    value = re.sub(r"\\s+", " ", value.strip()).replace(",", "")
+    value = re.sub(r"\s+", " ", value.strip()).replace(",", "")
     formats = (
         "%d-%m-%Y", "%d-%m-%y", "%d/%m/%Y", "%d/%m/%y",
         "%Y-%m-%d", "%d %B %Y", "%d %b %Y",
@@ -410,11 +410,11 @@ def parse_invoice_date(value: str) -> str:
 def parse_warranty_months(text: str) -> int:
     """Detect explicit warranty duration; avoid guessing if absent."""
     patterns = (
-        (r"\\b(\\d{1,2})\\s*[- ]?\\s*years?\\b.{0,50}\\bwarranty\\b", 12),
-        (r"\\bwarranty\\b.{0,50}\\b(\\d{1,2})\\s*years?\\b", 12),
-        (r"\\b(\\d{1,3})\\s*months?\\b.{0,50}\\bwarranty\\b", 1),
-        (r"\\bwarranty\\b.{0,50}\\b(\\d{1,3})\\s*months?\\b", 1),
-        (r"\\bwarranty\\s*[:\\-]?\\s*(\\d{1,3})\\s*(?:month|months)\\b", 1),
+        (r"\b(\d{1,2})\s*[- ]?\s*years?\b.{0,50}\bwarranty\b", 12),
+        (r"\bwarranty\b.{0,50}\b(\d{1,2})\s*years?\b", 12),
+        (r"\b(\d{1,3})\s*months?\b.{0,50}\bwarranty\b", 1),
+        (r"\bwarranty\b.{0,50}\b(\d{1,3})\s*months?\b", 1),
+        (r"\bwarranty\s*[:\-]?\s*(\d{1,3})\s*(?:month|months)\b", 1),
     )
     for pattern, multiplier in patterns:
         match = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
@@ -428,11 +428,11 @@ def parse_warranty_months(text: str) -> int:
 def parse_warranty_end(text: str) -> str:
     """Detect an explicitly labelled warranty expiry/end date."""
     date_pattern = (
-        r"(?:warranty\\s*)?(?:end|expiry|expiration|expires|valid until)"
-        r"\\s*(?:date)?\\s*[:\\-]?\\s*"
-        r"(\\d{1,2}[/-]\\d{1,2}[/-]\\d{2,4}|"
-        r"\\d{1,2}\\s+[A-Za-z]+\\s+\\d{4}|"
-        r"[A-Za-z]+\\s+\\d{1,2},?\\s+\\d{4})"
+        r"(?:warranty\s*)?(?:end|expiry|expiration|expires|valid until)"
+        r"\s*(?:date)?\s*[:\-]?\s*"
+        r"(\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|"
+        r"\d{1,2}\s+[A-Za-z]+\s+\d{4}|"
+        r"[A-Za-z]+\s+\d{1,2},?\s+\d{4})"
     )
     match = re.search(date_pattern, text, re.IGNORECASE)
     return parse_invoice_date(match.group(1)) if match else ""
@@ -441,7 +441,7 @@ def parse_warranty_end(text: str) -> str:
 def parse_fields(text: str, filename: str):
     """Best-effort invoice extraction; always verify OCR results."""
     lines = [
-        re.sub(r"\\s+", " ", line).strip()
+        re.sub(r"\s+", " ", line).strip()
         for line in text.splitlines()
         if line.strip()
     ]
@@ -464,7 +464,7 @@ def parse_fields(text: str, filename: str):
 
     amount = None
     amount_matches = re.findall(
-        r"(?:₹|INR|Rs\\.?)\\s*([0-9,]+(?:\\.[0-9]{1,2})?)",
+        r"(?:₹|INR|Rs\.?)\s*([0-9,]+(?:\.[0-9]{1,2})?)",
         text,
         re.IGNORECASE,
     )
@@ -476,8 +476,8 @@ def parse_fields(text: str, filename: str):
     else:
         # Fallback for invoice totals written without a currency symbol.
         total_match = re.search(
-            r"(?:grand total|invoice total|total amount|amount paid|total)\\s*[:\\-]?\\s*"
-            r"(?:₹|INR|Rs\\.?)?\\s*([0-9,]+(?:\\.[0-9]{1,2})?)",
+            r"(?:grand total|invoice total|total amount|amount paid|total)\s*[:\-]?\s*"
+            r"(?:₹|INR|Rs\.?)?\s*([0-9,]+(?:\.[0-9]{1,2})?)",
             text,
             re.IGNORECASE,
         )
@@ -489,18 +489,18 @@ def parse_fields(text: str, filename: str):
 
     purchase_date = ""
     date_patterns = (
-        r"\\b\\d{1,2}[/-]\\d{1,2}[/-]\\d{2,4}\\b",
-        r"\\b\\d{1,2}\\s+[A-Za-z]+\\s+\\d{4}\\b",
-        r"\\b[A-Za-z]+\\s+\\d{1,2},?\\s+\\d{4}\\b",
-        r"\\b\\d{4}-\\d{1,2}-\\d{1,2}\\b",
+        r"\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b",
+        r"\b\d{1,2}\s+[A-Za-z]+\s+\d{4}\b",
+        r"\b[A-Za-z]+\s+\d{1,2},?\s+\d{4}\b",
+        r"\b\d{4}-\d{1,2}-\d{1,2}\b",
     )
     # Prefer dates near a purchase/invoice label.
     labelled = re.search(
-        r"(?:invoice date|purchase date|order date|date of purchase|date)\\s*[:\\-]?\\s*"
-        r"(\\d{1,2}[/-]\\d{1,2}[/-]\\d{2,4}|"
-        r"\\d{1,2}\\s+[A-Za-z]+\\s+\\d{4}|"
-        r"[A-Za-z]+\\s+\\d{1,2},?\\s+\\d{4}|"
-        r"\\d{4}-\\d{1,2}-\\d{1,2})",
+        r"(?:invoice date|purchase date|order date|date of purchase|date)\s*[:\-]?\s*"
+        r"(\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|"
+        r"\d{1,2}\s+[A-Za-z]+\s+\d{4}|"
+        r"[A-Za-z]+\s+\d{1,2},?\s+\d{4}|"
+        r"\d{4}-\d{1,2}-\d{1,2})",
         text,
         re.IGNORECASE,
     )
@@ -2251,4 +2251,5 @@ async def gmail_push(request: Request):
             detail=f"Automatic Gmail processing failed: {str(exc)[:200]}",
 
         ) from exc
+
 
