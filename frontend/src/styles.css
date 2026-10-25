@@ -27,3 +27,453 @@
 @media(max-width:800px){.sidebar{width:68px;flex-basis:68px;padding:18px 8px}.brand{padding:0 5px 5px}.brand-name,.brand-caption,.nav-item span,.sidebar-note,.sidebar-bottom{display:none}.brand-mark{width:44px}.side-nav{margin-top:28px}.nav-item{justify-content:center;padding:14px 8px}.nav-item.selected:before{display:none}.main-area{padding:16px 14px 0}.welcome{align-items:flex-start;flex-direction:column;margin:34px 0 24px;gap:18px}.welcome h1{font-size:27px}.welcome p{line-height:1.6}.topbar{gap:8px}.top-actions{gap:5px}.user-chip>span:not(.avatar),.user-chip>svg{display:none}.searchbox{padding:0 10px}.searchbox input{font-size:12px}.intro-card{grid-template-columns:44px 1fr;padding:18px 16px 0;gap:12px}.intro-icon{width:42px;height:42px}.intro-card .soft-button{grid-column:2;justify-self:start}.gmail-top>.primary-button,.panel{padding:18px 14px}.panel-heading{flex-direction:column}.panel-heading h2{font-size:19px}.warranty-summary{justify-content:flex-start}.list-toolbar{align-items:flex-start;flex-direction:column;padding-bottom:8px}.filter-tabs{width:100%;gap:14px}.filter-tabs button{font-size:11px;padding:12px 0 10px}.sort-button{align-self:flex-end}.bill-row{grid-template-columns:46px minmax(0,1fr) 18px;gap:9px;padding:14px 2px}.receipt-thumb{width:42px;height:49px;grid-row:1/3}.bill-main{grid-column:2;grid-row:1}.bill-meta{grid-column:2;grid-row:2;display:flex;flex-direction:row;align-items:center;gap:8px}.bill-meta small{display:none}.bill-meta b{font-size:11px}.warranty-info{display:none}.bill-row>.status{grid-column:2;grid-row:3;justify-self:start}.row-arrow{grid-column:3;grid-row:1;transform:rotate(-90deg)}.form-grid{grid-template-columns:1fr}.modal{padding:19px}.modal-foot{flex-wrap:wrap}.setting-row{gap:10px}.setting-symbol{width:35px;height:35px;flex-shrink:0}.setting-copy span{line-height:1.4}.warranty-summary>div{font-size:10px;padding:7px}.page-footer{letter-spacing:1px}}
 @media(max-width:430px){.sidebar{width:58px;flex-basis:58px;padding-left:5px;padding-right:5px}.brand-mark{width:42px;height:42px}.main-area{padding-left:10px;padding-right:10px}.welcome h1{font-size:23px}.welcome .primary-button{width:100%}.gmail-top>.primary-button{margin-left:0}.filter-tabs{gap:10px}.filter-tabs button{font-size:10px}.modal-backdrop{padding:8px}.modal{max-height:calc(100vh - 16px);padding:16px}.warranty-summary{gap:6px}.warranty-summary>div{gap:5px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* =========================================
+   RASEED — MIDNIGHT + PURPLE THEME
+   ========================================= */
+
+:root {
+  --ink: #0B1020;
+  --muted: #64748B;
+  --line: #E2E8F0;
+  --paper: #FFFFFF;
+  --cream: #F8FAFC;
+
+  --purple: #6C5CE7;
+  --purple-light: #A78BFA;
+  --purple-soft: #F0EDFF;
+  --midnight: #0B1020;
+
+  --verified: #22C55E;
+  --error: #EF4444;
+}
+
+body,
+.app-shell {
+  background: #F8FAFC;
+  color: #0B1020;
+}
+
+/* Sidebar */
+.sidebar {
+  background: #0B1020;
+  border-right: 1px solid #252B40;
+}
+
+.brand {
+  color: #FFFFFF;
+}
+
+.brand-mark {
+  background: #6C5CE7;
+  color: #FFFFFF;
+  border-color: #8174ED;
+}
+
+.brand-name {
+  color: #FFFFFF;
+}
+
+.brand-caption,
+.sidebar-note,
+.sidebar-bottom {
+  color: #A1A8BD;
+}
+
+.sidebar-bottom {
+  border-color: #252B40;
+}
+
+.nav-item {
+  color: #B7BED1;
+}
+
+.nav-item:hover,
+.nav-item.selected {
+  background: #24203F;
+  color: #FFFFFF;
+}
+
+.nav-item.selected:before {
+  background: #A78BFA;
+}
+
+.paper-art {
+  color: #A78BFA;
+}
+
+/* Main content */
+.main-area {
+  background: #F8FAFC;
+}
+
+.welcome h1 {
+  color: #0B1020;
+}
+
+.eyebrow {
+  color: #6C5CE7;
+}
+
+.welcome p {
+  color: #64748B;
+}
+
+.heart {
+  color: #A78BFA;
+}
+
+/* Search */
+.searchbox {
+  background: #FFFFFF;
+  border-color: #E2E8F0;
+  color: #64748B;
+}
+
+.searchbox:focus-within {
+  border-color: #6C5CE7;
+  box-shadow: 0 0 0 3px #6C5CE722;
+}
+
+.searchbox input {
+  color: #0B1020;
+}
+
+.searchbox input::placeholder {
+  color: #94A3B8;
+}
+
+.icon-button {
+  color: #6C5CE7;
+}
+
+.icon-button:hover,
+.user-chip:hover {
+  background: #F0EDFF;
+}
+
+.avatar {
+  background: #E9E5FF;
+  color: #6C5CE7;
+}
+
+/* Primary buttons */
+.primary-button {
+  background: #6C5CE7;
+  border-color: #6C5CE7;
+  color: #FFFFFF;
+  box-shadow: 0 5px 16px #6C5CE729;
+}
+
+.primary-button:hover {
+  background: #5948D6;
+  border-color: #5948D6;
+}
+
+.secondary-button,
+.soft-button {
+  background: #F0EDFF;
+  color: #5948D6;
+  border-color: #DDD6FE;
+}
+
+.secondary-button:hover,
+.soft-button:hover {
+  background: #E5DEFF;
+  border-color: #A78BFA;
+}
+
+.text-button {
+  color: #64748B;
+}
+
+/* Cards and panels */
+.intro-card,
+.gmail-card,
+.panel {
+  background: #FFFFFF;
+  border-color: #E2E8F0;
+  box-shadow: 0 8px 28px #0B102008;
+}
+
+.intro-icon {
+  background: #F0EDFF;
+  color: #6C5CE7;
+  border-radius: 13px;
+}
+
+.intro-copy h2,
+.gmail-copy h2 {
+  color: #0B1020;
+}
+
+.intro-copy p,
+.gmail-copy p,
+.intro-foot {
+  color: #64748B;
+}
+
+.intro-foot {
+  border-color: #E2E8F0;
+}
+
+.panel-heading h2 {
+  color: #0B1020;
+}
+
+.panel-heading p {
+  color: #64748B;
+}
+
+/* Bill filters */
+.list-toolbar {
+  border-color: #E2E8F0;
+}
+
+.filter-tabs button {
+  color: #64748B;
+}
+
+.filter-tabs button:hover,
+.filter-tabs button.active {
+  color: #6C5CE7;
+  border-bottom-color: #6C5CE7;
+}
+
+.sort-button {
+  background: #FFFFFF;
+  border-color: #E2E8F0;
+  color: #64748B;
+}
+
+/* Bill rows */
+.bill-row {
+  color: #0B1020;
+  border-color: #E2E8F0;
+}
+
+.bill-row:hover {
+  background: #F8FAFC;
+}
+
+.bill-main b {
+  color: #0B1020;
+}
+
+.bill-main small,
+.bill-meta small {
+  color: #64748B;
+}
+
+.bill-meta b {
+  color: #334155;
+}
+
+.receipt-thumb {
+  background: #F0EDFF;
+  border-color: #DDD6FE;
+  color: #6C5CE7;
+}
+
+/* Warranty statuses */
+.status.active {
+  background: #DCFCE7;
+  color: #166534;
+}
+
+.status.soon {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.status.expired {
+  background: #FEE2E2;
+  color: #B91C1C;
+}
+
+.status.none {
+  background: #E2E8F0;
+  color: #475569;
+}
+
+.warranty-summary > div {
+  border-color: #E2E8F0;
+}
+
+.warranty-summary b {
+  color: #0B1020;
+}
+
+.summary-dot.green {
+  background: #22C55E;
+}
+
+.summary-dot.amber {
+  background: #F59E0B;
+}
+
+.summary-dot.red {
+  background: #EF4444;
+}
+
+/* Empty state */
+.empty-state {
+  color: #64748B;
+}
+
+.empty-state b {
+  color: #0B1020;
+}
+
+.empty-icon {
+  background: #F0EDFF;
+  color: #6C5CE7;
+}
+
+/* Settings */
+.setting-row {
+  border-color: #E2E8F0;
+}
+
+.setting-symbol {
+  background: #F0EDFF;
+  color: #6C5CE7;
+}
+
+.setting-copy b {
+  color: #0B1020;
+}
+
+.setting-copy span {
+  color: #64748B;
+}
+
+.toggle.on {
+  background: #6C5CE7;
+}
+
+/* Upload modal */
+.modal-backdrop {
+  background: #0B1020B8;
+}
+
+.modal {
+  background: #FFFFFF;
+  border-color: #E2E8F0;
+}
+
+.modal-head h2 {
+  color: #0B1020;
+}
+
+.modal-head p {
+  color: #64748B;
+}
+
+.dropzone {
+  background: #F8F7FF;
+  border-color: #A78BFA;
+  color: #5948D6;
+}
+
+.dropzone:hover {
+  background: #F0EDFF;
+  border-color: #6C5CE7;
+}
+
+.upload-circle {
+  background: #E9E5FF;
+  color: #6C5CE7;
+}
+
+.form-grid label {
+  color: #475569;
+}
+
+.form-grid input,
+.form-grid select {
+  background: #FFFFFF;
+  border-color: #CBD5E1;
+  color: #0B1020;
+  outline-color: #6C5CE7;
+}
+
+.ocr-note {
+  color: #64748B;
+}
+
+.modal-foot {
+  border-color: #E2E8F0;
+}
+
+.danger-button {
+  background: #FEF2F2;
+  color: #B91C1C;
+  border-color: #FECACA;
+}
+
+.alert-error {
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  color: #B91C1C;
+}
+
+.notice {
+  background: #DCFCE7;
+  border-color: #BBF7D0;
+  color: #166534;
+}
+
+.inline-error {
+  background: #FEF2F2;
+  color: #B91C1C;
+}
+
+/* Detail modal */
+.detail-grid {
+  background: #E2E8F0;
+  border-color: #E2E8F0;
+}
+
+.detail-grid > div {
+  background: #F8FAFC;
+}
+
+.detail-grid small {
+  color: #64748B;
+}
+
+.detail-grid b {
+  color: #0B1020;
+}
+
+.file-link {
+  color: #6C5CE7;
+}
+
+.page-footer {
+  color: #64748B;
+}
+
+.page-footer span {
+  color: #6C5CE7;
+}
+
+/* Keyboard accessibility */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid #A78BFA;
+  outline-offset: 2px;
+}
+
+/* Responsive sidebar keeps the midnight theme */
+@media (max-width: 800px) {
+  .sidebar {
+    background: #0B1020;
+  }
+
+  .brand-mark {
+    background: #6C5CE7;
+  }
+}
